@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1602880237 source:c:\users\davip\documents\codes\c\snake\main.c
+	"menu.h"
+
+1602872130 source:c:\users\davip\documents\codes\c\snake\util.c
+	"util.h"
+	<stdio.h>
+	<windows.h>
+
+1602946389 c:\users\davip\documents\codes\c\snake\util.h
+	<stdio.h>
+	<windows.h>
+	<conio.h>
+
+1602967537 c:\users\davip\documents\codes\c\snake\gfx.h
+	"util.h"
+
+1602951720 c:\users\davip\documents\codes\c\snake\menu.h
+	"gfx.h"
+	"game.h"
+
+1602967940 c:\users\davip\documents\codes\c\snake\game.h
+	"gfx.h"
+	<time.h>
+
