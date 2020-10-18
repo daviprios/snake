@@ -4,10 +4,10 @@
 #include "gfx.h"
 #include <time.h>
 
-#define HEIGHT 10
-#define WIDTH 6
+#define HEIGHT 20
+#define WIDTH 40
 #define OFFSET 1
-#define FRAMERATE 400
+#define FRAMERATE 150
 #define INITIAL_SIZE 3
 
 void handle_win(){
@@ -22,24 +22,29 @@ void handle_lose(){
     system("pause");
 }
 
-void food_random(int food[2]){
-    do{
-        food[0] = rand() % WIDTH;
-        food[1] = rand() % HEIGHT;
-    }while((food[0] > WIDTH + OFFSET || food[0] < OFFSET) || (food[1] > HEIGHT + OFFSET || food[1] < OFFSET));
+void random(int *number, int minimum, int maximum){
+    *number = (rand() % maximum) + minimum;
 }
 
 void food_create(int body[HEIGHT*WIDTH][2], int length, int food[2]){
-    cursormove(0, 28);
+    cursormove(WIDTH + 3, 3);
     printf("%d - %d     ", food[0], food[1]);
-    for(int count = 0; count < length; count++){
-        if(food[0] == body[count][0] || food[1] == body[count][1]){
-            food_random(food);
-            count = 0;
+
+    int position[2] = {};
+    int verifybody = 1;
+    do{
+        random(&position[0], OFFSET, WIDTH);
+        random(&position[1], OFFSET, HEIGHT);
+        for(int count = 0; count < length; count++){
+            if(food[0] == body[count][0] || food[1] == body[count][1]){
+                verifybody = 1;
+                break;
+            }
+            verifybody--;
         }
-    }
-    cursormove(0,25);
-    printf("%d - %d     ", food[0], food[1]);
+    }while(verifybody);
+    food[0] = position[0];
+    food[1] = position[1];
     cursormove(food[0], food[1]);
     printf("X");
 }
@@ -57,12 +62,6 @@ int food_eat(int moviment[2], int food[2], int *length, int body[HEIGHT*WIDTH][2
 
 int verifyalive(int head[2], int body[HEIGHT*WIDTH][2], int length){
     if(head[0] == 0 || head[0] == (OFFSET * 2 + WIDTH) || head[1] == 0 || head[1] == (OFFSET * 2 + HEIGHT)) return 0;
-
-    cursormove(0,26);
-    printf("%d - %d     ", head[0], head[1]);
-    cursormove(0,27);
-    printf("%d - %d     ", body[0][0], body[0][1]);
-
     for(int count = 1; count < length; count++)
         if(head[0] == body[count][0] && head[1] == body[count][1]) return 0;
     return 1;
@@ -82,14 +81,16 @@ void ajustbody(int body[HEIGHT*WIDTH][2], int length, int moviment[2]){
     moviment[1] = temp1[1];
 }
 
-void handlecontrol(int *direction, int *changedirection){
-    int olddirection = *direction;
-    *changedirection = getch();
-    if(*changedirection != KB_ARROW_DOWN && *changedirection != KB_ARROW_LEFT && *changedirection != KB_ARROW_RIGHT && *changedirection != KB_ARROW_UP) *changedirection = olddirection;
-    else if(*changedirection == KB_ARROW_UP && olddirection == KB_ARROW_DOWN) *changedirection = olddirection;
-    else if(*changedirection == KB_ARROW_DOWN && olddirection == KB_ARROW_UP) *changedirection = olddirection;
-    else if(*changedirection == KB_ARROW_LEFT && olddirection == KB_ARROW_RIGHT) *changedirection = olddirection;
-    else if(*changedirection == KB_ARROW_RIGHT && olddirection == KB_ARROW_LEFT) *changedirection = olddirection;
+void handlecontrol(int direction, int *changedirection){
+    int newdirection = getch();
+    if((newdirection == KB_ARROW_DOWN || newdirection == KB_ARROW_LEFT || newdirection == KB_ARROW_RIGHT || newdirection == KB_ARROW_UP)){
+        if((direction == KB_ARROW_DOWN && newdirection == KB_ARROW_UP)
+         || (direction == KB_ARROW_UP && newdirection == KB_ARROW_DOWN)
+         || (direction == KB_ARROW_LEFT && newdirection == KB_ARROW_RIGHT)
+         || (direction == KB_ARROW_RIGHT && newdirection == KB_ARROW_LEFT))
+            return;
+        else *changedirection = newdirection;
+    }
 }
 
 void game(){
@@ -108,12 +109,11 @@ void game(){
         body[count][0] = WIDTH/2;
         body[count][1] = HEIGHT/2 - count;
     }
-
     food_create(body, length, food);
 
     while(alive){
         start = clock();
-        if(kbhit()) handlecontrol(&direction, &changedirection);
+        if(kbhit()) handlecontrol(direction, &changedirection);
         if(time > FRAMERATE){
             direction = changedirection;
             if(direction == KB_ARROW_DOWN || direction == KB_ARROW_UP || direction == KB_ARROW_RIGHT || direction == KB_ARROW_LEFT){
@@ -138,7 +138,7 @@ void game(){
                 ajustbody(body, length, newmove);
             }
             if(alive){
-                draw_snake(body, length, newmove, food);
+                draw_snake(body[0], length, newmove, food);
                 time -= FRAMERATE;
             }
             cursormove(WIDTH + 3, 1);
@@ -151,7 +151,6 @@ void game(){
 
     if(score == HEIGHT * WIDTH - INITIAL_SIZE) handle_win();
     else handle_lose();
-
 }
 
 #endif // GAME_H

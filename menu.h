@@ -9,7 +9,7 @@
 void draw_menu(){
     clr();
     cursormove(0,0);
-    draw_component_square(40,15,0);
+    draw_component_square(12,7,0);
     char *item[] = { "Play", "Options", "HighScore", "Credits", "Exit" };
     for(int count = 0; count < MENUOPTIONS; count++){
         cursormove(3, count + 2);

@@ -60,11 +60,9 @@ void draw_component_square(int width, int height, int doubled){
     printf("%c\n",ul);
 }
 
-void draw_snake(int body[60][2], int length, int tail[2], int food[2]){
-    for(int count = 0; count < length; count++){
-        cursormove(body[count][0], body[count][1]);
-        printf("%c", $CHARACTER);
-    }
+void draw_snake(int head[2], int length, int tail[2], int food[2]){
+    cursormove(head[0], head[1]);
+    printf("%c", $CHARACTER);
     cursormove(tail[0], tail[1]);
     if(food[0] == tail[0] && food[1] == tail[1]) printf("X");
     else printf(" ");
