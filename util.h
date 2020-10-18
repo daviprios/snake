@@ -33,10 +33,6 @@ void clr(){
     system("cls");
 }
 
-void bubble(){
-
-}
-
 void save(char* filename, char* savetype, void *data, int datasize, int amount){
     FILE *arq;
     arq = fopen(filename, savetype);
