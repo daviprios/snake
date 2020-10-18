@@ -11,6 +11,8 @@
 #define KB_ARROW_DOWN 80
 #define KB_ARROW_LEFT 75
 
+#define SAVE_FILENAME "highscore.sav"
+
 #if __unix__
 void cursormove(int x, int y){
     printf("\033[%d;%dH", y, x);
@@ -31,10 +33,34 @@ void clr(){
     system("cls");
 }
 
-void save(char* filename, void *data, int datasize){
+void bubble(){
+
 }
 
-void load(char* filename, void *data, int datasize){
+void save(char* filename, char* savetype, void *data, int datasize, int amount){
+    FILE *arq;
+    arq = fopen(filename, savetype);
+    if(!arq) printf("COULDN\'T SAVE");
+    fwrite(data, datasize, amount, arq);
+    fclose(arq);
+}
+
+void load(char* filename, void *data, int datasize, int amount){
+    FILE *arq;
+    arq = fopen(filename, "r");
+    if(!arq) return;
+    fread(data, datasize, amount, arq);
+    fclose(arq);
+}
+
+void highscore_save(int *score, int highscore){
+    if(*score > highscore) save(SAVE_FILENAME, "w", score, sizeof(int), 1);
+}
+
+int highscore_load(){
+    int value = 0;
+    load(SAVE_FILENAME, &value, sizeof(int), 1);
+    return value;
 }
 
 #endif // UTIL_H

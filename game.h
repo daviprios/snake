@@ -27,20 +27,17 @@ void random(int *number, int minimum, int maximum){
 }
 
 void food_create(int body[HEIGHT*WIDTH][2], int length, int food[2]){
-    cursormove(WIDTH + 3, 3);
-    printf("%d - %d     ", food[0], food[1]);
-
     int position[2] = {};
     int verifybody = 1;
     do{
         random(&position[0], OFFSET, WIDTH);
         random(&position[1], OFFSET, HEIGHT);
         for(int count = 0; count < length; count++){
-            if(food[0] == body[count][0] || food[1] == body[count][1]){
+            if(position[0] == body[count][0] || position[1] == body[count][1]){
                 verifybody = 1;
                 break;
             }
-            verifybody--;
+            else verifybody = 0;
         }
     }while(verifybody);
     food[0] = position[0];
@@ -81,8 +78,9 @@ void ajustbody(int body[HEIGHT*WIDTH][2], int length, int moviment[2]){
     moviment[1] = temp1[1];
 }
 
-void handlecontrol(int direction, int *changedirection){
+void handlecontrol(int direction, int *changedirection, int *exit){
     int newdirection = getch();
+    if(newdirection == KB_ESCAPE) *exit = 1;
     if((newdirection == KB_ARROW_DOWN || newdirection == KB_ARROW_LEFT || newdirection == KB_ARROW_RIGHT || newdirection == KB_ARROW_UP)){
         if((direction == KB_ARROW_DOWN && newdirection == KB_ARROW_UP)
          || (direction == KB_ARROW_UP && newdirection == KB_ARROW_DOWN)
@@ -91,6 +89,11 @@ void handlecontrol(int direction, int *changedirection){
             return;
         else *changedirection = newdirection;
     }
+}
+
+void handlehighscore(int score){
+    cursormove(WIDTH + 3, 2);
+    printf("HighScore: %d", score);
 }
 
 void game(){
@@ -102,9 +105,11 @@ void game(){
     int direction = KB_ARROW_DOWN, changedirection = KB_ARROW_DOWN;
     int length = INITIAL_SIZE, body[HEIGHT*WIDTH][2] = {}, newmove[2] = {};
     int alive = 1, food[2] = {};
-    int score = 0;
+    int score = 0, highscore = 0, exit = 0;
 
     draw_component_square(WIDTH + 1, HEIGHT + 1, 0);
+    highscore = highscore_load();
+    handlehighscore(highscore);
     for(int count = 0; count < INITIAL_SIZE; count++){
         body[count][0] = WIDTH/2;
         body[count][1] = HEIGHT/2 - count;
@@ -113,7 +118,8 @@ void game(){
 
     while(alive){
         start = clock();
-        if(kbhit()) handlecontrol(direction, &changedirection);
+        if(kbhit()) handlecontrol(direction, &changedirection, &exit);
+        if(exit) return;
         if(time > FRAMERATE){
             direction = changedirection;
             if(direction == KB_ARROW_DOWN || direction == KB_ARROW_UP || direction == KB_ARROW_RIGHT || direction == KB_ARROW_LEFT){
@@ -149,6 +155,7 @@ void game(){
         time += stop - start;
     }
 
+    highscore_save(&score, highscore);
     if(score == HEIGHT * WIDTH - INITIAL_SIZE) handle_win();
     else handle_lose();
 }
